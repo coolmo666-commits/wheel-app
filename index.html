@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>幫我老婆決定下次畫乜好!</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #333;
+    }
+
+    .container {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 500px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      display: inline-block;
+      margin: 10px 0 20px 0;
+    }
+
+    canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .btn {
+      background: #4a90e2;
+      color: white;
+      border: none;
+      padding: 14px 40px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
+      transition: all 0.2s ease;
+      outline: none;
+    }
+
+    .btn:hover {
+      background: #357abd;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(74, 144, 226, 0.6);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn:disabled {
+      background: #ccc;
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .result-box {
+      margin-top: 25px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 12px;
+      border: 1px solid #e9ecef;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .result-title {
+      font-size: 14px;
+      color: #6c757d;
+      margin-bottom: 5px;
+    }
+
+    .result-text {
+      font-size: 18px;
+      font-weight: bold;
+      color: #2e7d32;
+    }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 15px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>幫我老婆決定下次畫乜好!</h1>
+
+    <div class="canvas-wrapper">
+      <canvas id="wheelCanvas" width="440" height="440"></canvas>
+    </div>
+
+    <div>
+      <button id="spinBtn" class="btn" onclick="spinWheel()">開始旋轉</button>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-color" style="background:#ff9aa2;"></div> 外圈：類型</div>
+      <div class="legend-item"><div class="legend-color" style="background:#f6bd60;"></div> 中圈：顏色</div>
+      <div class="legend-item"><div class="legend-color" style="background:#84dcc6;"></div> 內圈：方式</div>
+    </div>
+
+    <div class="result-box">
+      <div class="result-title">最終決定</div>
+      <div id="resultText" class="result-text">點擊按鈕開啟今日選擇！</div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    const spinBtn = document.getElementById('spinBtn');
+    const resultText = document.getElementById('resultText');
+
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+
+    // 定義三層輪盤的資料與半徑
+    const layers = [
+      {
+        name: "外圈",
+        rInner: 140,
+        rOuter: 200,
+        items: ["One Piece", "Naruto", "Dan da dan", "bleach", "dragonball", "Slam Dunk"],
+        colors: ["#FF9AA2", "#FFB7B2", "#FFDAC1", "#E2F0CB", "#B5EAD7", "#C7CEEA"],
+        angle: 0,
+        speed: 0,
+        friction: 0.985
+      },
+      {
+        name: "中圈",
+        rInner: 80,
+        rOuter: 140,
+        items: ["red", "blue", "green", "pink", "white"],
+        colors: ["#F6BD60", "#F7ADE1", "#84DCC6", "#A5A58D", "#D8E2DC"],
+        angle: 0,
+        speed: 0,
+        friction: 0.982
+      },
+      {
+        name: "內圈",
+        rInner: 25,
+        rOuter: 80,
+        items: ["擬態化", "造型化", "無變化"],
+        colors: ["#E8AEB7", "#B8E0D2", "#D6E2E9"],
+        angle: 0,
+        speed: 0,
+        friction: 0.980
+      }
+    ];
+
+    let isSpinning = false;
+
+    // 繪製輪盤主邏輯
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 繪製每一層圓環
+      layers.forEach(layer => {
+        const sliceAngle = (Math.PI * 2) / layer.items.length;
+
+        layer.items.forEach((item, i) => {
+          const startAngle = layer.angle + i * sliceAngle;
+          const endAngle = startAngle + sliceAngle;
+
+          // 繪製扇形弧塊
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, layer.rOuter, startAngle, endAngle);
+          ctx.arc(centerX, centerY, layer.rInner, endAngle, startAngle, true);
+          ctx.closePath();
+
+          ctx.fillStyle = layer.colors[i % layer.colors.length];
+          ctx.fill();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = "#ffffff";
+          ctx.stroke();
+
+          // 繪製文字
+          ctx.save();
+          const midAngle = startAngle + sliceAngle / 2;
+          const textRadius = (layer.rInner + layer.rOuter) / 2;
+          
+          ctx.translate(
+            centerX + Math.cos(midAngle) * textRadius,
+            centerY + Math.sin(midAngle) * textRadius
+          );
+          ctx.rotate(midAngle + Math.PI / 2); // 調整文字角度為切線方向
+
+          ctx.fillStyle = "#333333";
+          ctx.font = "bold 12px sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(item, 0, 0);
+          ctx.restore();
+        });
+      });
+
+      // 繪製中心小圓點
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 20, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "#4a90e2";
+      ctx.stroke();
+
+      // 繪製頂部指針（指向 12 點鐘方向）
+      drawPointer();
+    }
+
+    // 繪製固定頂部指針
+    function drawPointer() {
+      const pointerLength = 20;
+      const topY = centerY - 200; // 外圈最邊緣頂端
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(centerX - 12, topY - 10);
+      ctx.lineTo(centerX + 12, topY - 10);
+      ctx.lineTo(centerX, topY + pointerLength - 10);
+      ctx.closePath();
+
+      ctx.fillStyle = "#e74c3c";
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#ffffff";
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 開始旋轉
+    function spinWheel() {
+      if (isSpinning) return;
+
+      isSpinning = true;
+      spinBtn.disabled = true;
+      resultText.innerText = "選擇中...";
+
+      // 為每一層設定隨機初始速度與微幅不同的摩擦係數
+      layers.forEach(layer => {
+        layer.speed = Math.random() * 0.2 + 0.3; // 初始角速度
+        layer.friction = 0.98 + Math.random() * 0.008; // 隨機減速係數
+      });
+
+      animate();
+    }
+
+    // 動畫循環
+    function animate() {
+      let stillMoving = false;
+
+      layers.forEach(layer => {
+        if (layer.speed > 0.0005) {
+          layer.angle += layer.speed;
+          layer.speed *= layer.friction;
+          stillMoving = true;
+        } else {
+          layer.speed = 0;
+        }
+      });
+
+      draw();
+
+      if (stillMoving) {
+        requestAnimationFrame(animate);
+      } else {
+        isSpinning = false;
+        spinBtn.disabled = false;
+        calculateResult();
+      }
+    }
+
+    // 計算指針落在哪一個區域（12點鐘方向，角度為 -Math.PI / 2 或 1.5 * Math.PI）
+    function calculateResult() {
+      const pointerAngle = -Math.PI / 2;
+      const results = [];
+
+      layers.forEach(layer => {
+        const sliceAngle = (Math.PI * 2) / layer.items.length;
+        
+        // 將指針角度轉換為相對於輪盤目前的旋轉角度
+        let relativeAngle = (pointerAngle - layer.angle) % (Math.PI * 2);
+        if (relativeAngle < 0) relativeAngle += Math.PI * 2;
+
+        const selectedIndex = Math.floor(relativeAngle / sliceAngle) % layer.items.length;
+        results.push(layer.items[selectedIndex]);
+      });
+
+      // 顯示結果組合
+      resultText.innerHTML = `${results[0]} <span style="color:#aaa;">➔</span> ${results[1]} <span style="color:#aaa;">➔</span> ${results[2]}`;
+    }
+
+    // 初始繪製
+    draw();
+  </script>
+</body>
+</html>
