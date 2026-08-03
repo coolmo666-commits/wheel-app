@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>幫我老婆決定下次畫乜好!</title>
+<link rel="manifest" href="./manifest.json"> <meta name="theme-color" content="#4a90e2"> <meta name="apple-mobile-web-app-capable" content="yes"> <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <meta name="apple-mobile-web-app-title" content="畫乜好輪盤"> <link rel="apple-touch-icon" href="./icon-192.png">
   <style>
     * {
       box-sizing: border-box;
@@ -341,5 +342,6 @@
     // 初始繪製
     draw();
   </script>
+<script> if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js') .then(() => console.log('PWA Service Worker 註冊成功！')) .catch((err) => console.log('Service Worker 註冊失敗：', err)); }); } </script>
 </body>
 </html>
