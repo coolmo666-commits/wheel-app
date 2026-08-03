@@ -4,7 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>幫我老婆決定下次畫乜好!</title>
-<link rel="manifest" href="./manifest.json"> <meta name="theme-color" content="#4a90e2"> <meta name="apple-mobile-web-app-capable" content="yes"> <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"> <meta name="apple-mobile-web-app-title" content="畫乜好輪盤"> <link rel="apple-touch-icon" href="./icon-192.png">
+
+  <!-- PWA & Apple 專用標籤 -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#2c3e50">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="下次畫乜好!">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+
   <style>
     * {
       box-sizing: border-box;
@@ -13,335 +21,735 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at center, #2a0813 0%, #0d0205 100%);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px;
-      color: #333;
+      padding: 20px 10px;
+      color: #fff;
     }
 
-    .container {
-      background: #ffffff;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      text-align: center;
-      max-width: 500px;
-      width: 100%;
-    }
-
-    h1 {
-      font-size: 24px;
-      margin-bottom: 20px;
-      color: #2c3e50;
-    }
-
-    .canvas-wrapper {
+    /* 主機台外殼 */
+    .machine-wrapper {
       position: relative;
-      display: inline-block;
-      margin: 10px 0 20px 0;
+      max-width: 460px;
+      width: 100%;
+      margin: 20px auto;
     }
 
-    canvas {
-      display: block;
-      max-width: 100%;
-      height: auto;
+    .machine-container {
+      background: linear-gradient(180deg, #60101d 0%, #34060d 70%, #200307 100%);
+      border: 5px solid #ffd700;
+      outline: 3px solid #8a640f;
+      border-radius: 28px 28px 20px 20px;
+      padding: 15px 18px 25px 18px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.9), inset 0 0 20px rgba(255, 215, 0, 0.4);
+      text-align: center;
+      position: relative;
     }
 
-    .btn {
-      background: #4a90e2;
-      color: white;
-      border: none;
-      padding: 14px 40px;
+    /* 頂部拱形皇冠與紅心 */
+    .machine-crown {
+      background: linear-gradient(180deg, #d4af37 0%, #85581a 100%);
+      border: 2px solid #fff2a3;
+      border-radius: 50px 50px 0 0;
+      padding: 8px 15px 5px 15px;
+      margin: -35px auto 12px auto;
+      width: 82%;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.5);
+      position: relative;
+    }
+
+    .crown-star {
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 28px;
+      color: #ff2a55;
+      text-shadow: 0 0 10px #ff2a55, 0 0 20px #ffd700;
+    }
+
+    .neon-title {
       font-size: 18px;
-      font-weight: bold;
-      border-radius: 30px;
-      cursor: pointer;
-      box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
-      transition: all 0.2s ease;
-      outline: none;
+      font-weight: 900;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      text-shadow: 0 0 5px #ff2a55, 0 0 10px #ff2a55, 0 0 20px #ff2a55;
     }
 
-    .btn:hover {
-      background: #357abd;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(74, 144, 226, 0.6);
-    }
-
-    .btn:active {
-      transform: translateY(0);
-    }
-
-    .btn:disabled {
-      background: #ccc;
-      box-shadow: none;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .result-box {
-      margin-top: 25px;
-      padding: 15px;
-      background: #f8f9fa;
-      border-radius: 12px;
-      border: 1px solid #e9ecef;
-      min-height: 80px;
+    /* 邊框裝飾彩燈 */
+    .side-bulbs {
+      position: absolute;
+      top: 60px;
+      bottom: 20px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      justify-content: space-around;
+      z-index: 5;
     }
 
-    .result-title {
-      font-size: 14px;
-      color: #6c757d;
-      margin-bottom: 5px;
+    .side-bulbs.left { left: 6px; }
+    .side-bulbs.right { right: 6px; }
+
+    .bulb {
+      width: 10px;
+      height: 10px;
+      background-color: #ffd700;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #ffd700;
+      animation: flash 1s infinite alternate;
     }
 
-    .result-text {
-      font-size: 18px;
+    .bulb:nth-child(even) {
+      background-color: #ff2a55;
+      box-shadow: 0 0 8px #ff2a55;
+      animation-delay: 0.5s;
+    }
+
+    @keyframes flash {
+      0% { opacity: 0.3; transform: scale(0.8); }
+      100% { opacity: 1; transform: scale(1.1); }
+    }
+
+    /* 右側搖桿 (Lever) */
+    .lever-container {
+      position: absolute;
+      right: -32px;
+      top: 100px;
+      height: 160px;
+      width: 30px;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .lever-base {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 20px;
+      height: 35px;
+      background: linear-gradient(90deg, #8a640f, #ffd700, #573e07);
+      border-radius: 5px;
+      border: 1px solid #000;
+    }
+
+    .lever-rod {
+      position: absolute;
+      bottom: 20px;
+      left: 7px;
+      width: 6px;
+      height: 100px;
+      background: linear-gradient(90deg, #ccc, #fff, #888);
+      transform-origin: bottom center;
+      transition: transform 0.3s ease-in-out;
+      border-radius: 3px;
+    }
+
+    .lever-ball {
+      position: absolute;
+      top: -18px;
+      left: -12px;
+      width: 30px;
+      height: 30px;
+      background: radial-gradient(circle at 30% 30%, #ff6b81, #cc0000, #500000);
+      border-radius: 50%;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.6);
+    }
+
+    /* 拉桿下拉動畫 */
+    .lever-container.pull .lever-rod {
+      transform: rotateX(60deg) scaleY(0.6);
+    }
+
+    /* 滾筒區域金屬框 */
+    .slot-frame {
+      background: #000;
+      border-radius: 12px;
+      padding: 8px 6px;
+      border: 4px solid #d4af37;
+      display: flex;
+      justify-content: space-between;
+      gap: 4px;
+      box-shadow: inset 0 0 15px #000, 0 0 10px rgba(255,215,0,0.3);
+      margin: 10px 0 15px 0;
+    }
+
+    .reel-column {
+      flex: 1;
+      background: #fff;
+      border-radius: 6px;
+      height: 120px;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid #bbb;
+    }
+
+    /* 上下非選取區壓暗與立體陰影 */
+    .reel-column::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.4) 0%,
+        rgba(0,0,0,0.05) 33.3%,
+        transparent 33.3%,
+        transparent 66.6%,
+        rgba(0,0,0,0.05) 66.6%,
+        rgba(0,0,0,0.4) 100%
+      );
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* 中央選取線標示 */
+    .reel-column::after {
+      content: '';
+      position: absolute;
+      top: 40px;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: rgba(255, 215, 0, 0.2);
+      border-top: 2px solid #ff2a55;
+      border-bottom: 2px solid #ff2a55;
+      box-shadow: 0 0 6px rgba(255, 42, 85, 0.8);
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .reel-header {
+      font-size: 11px;
+      color: #ffd700;
+      margin-bottom: 3px;
       font-weight: bold;
-      color: #2e7d32;
+      text-shadow: 0 1px 2px #000;
     }
 
-    .legend {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-top: 15px;
-      font-size: 12px;
-      color: #666;
+    .reel-strip {
+      transition: transform 0.1s ease-out;
     }
 
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
+    .reel-item {
+      height: 40px;
+      line-height: 40px;
+      color: #111;
+      font-weight: bold;
+      font-size: 13px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 2px;
     }
 
-    .legend-color {
+    /* 顏色樣式標籤 */
+    .color-tag {
+      display: inline-block;
       width: 12px;
       height: 12px;
       border-radius: 50%;
+      margin-right: 4px;
+      vertical-align: middle;
+      border: 1px solid #ccc;
+    }
+
+    /* LOGO 顯示樣式 */
+    .ip-logo-img {
+      max-height: 34px;
+      max-width: 80px;
+      object-fit: contain;
+      vertical-align: middle;
+    }
+
+    .result-logo-img {
+      max-height: 22px;
+      max-width: 80px;
+      object-fit: contain;
+      vertical-align: middle;
+      margin: 0 4px;
+    }
+
+    /* 拉桿與按鈕 */
+    .controls {
+      margin-top: 5px;
+    }
+
+    .spin-btn {
+      background: linear-gradient(180deg, #ffe066 0%, #f39c12 50%, #d35400 100%);
+      color: #300;
+      border: 2px solid #fff;
+      padding: 12px 35px;
+      font-size: 20px;
+      font-weight: 900;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6), inset 0 2px 5px rgba(255,255,255,0.8);
+      text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+      transition: all 0.15s;
+    }
+
+    .spin-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(255, 215, 0, 0.5);
+    }
+
+    .spin-btn:active {
+      transform: scale(0.98);
+    }
+
+    .spin-btn:disabled {
+      background: #555;
+      color: #888;
+      border-color: #666;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* 結果顯示區 */
+    .result-box {
+      margin-top: 15px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 10px;
+      padding: 10px;
+      border: 1px solid #8a640f;
+      box-shadow: inset 0 0 8px #000;
+    }
+
+    .result-title {
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 4px;
+    }
+
+    .result-text {
+      font-size: 15px;
+      color: #4CAF50;
+      font-weight: bold;
+      word-break: break-all;
+    }
+
+    /* 二階段彈窗 (通用分類二次抽選) */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.88);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: linear-gradient(180deg, #3a0a14 0%, #1a0308 100%);
+      border: 3px solid #ffd700;
+      border-radius: 18px;
+      padding: 20px 15px;
+      text-align: center;
+      max-width: 340px;
+      width: 100%;
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.3);
+      animation: popIn 0.3s ease;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .anime-reel-frame {
+      background: #fff;
+      height: 60px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 15px 0;
+      border: 3px solid #ffd700;
+      position: relative;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.5);
+    }
+
+    .anime-reel-item {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px;
+    }
+
+    /* 彈窗內圖片 LOGO 顯示 */
+    .anime-reel-item img {
+      max-height: 48px;
+      max-width: 180px;
+      object-fit: contain;
+    }
+
+    .close-btn {
+      background: linear-gradient(180deg, #ffd700, #f39c12);
+      color: #111;
+      border: none;
+      padding: 8px 25px;
+      border-radius: 20px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 5px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.5);
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>幫我老婆決定下次畫乜好!</h1>
+  <div class="machine-wrapper">
+    <!-- 主機台 -->
+    <div class="machine-container">
+      
+      <!-- 頂部皇冠與發光標題 -->
+      <div class="machine-crown">
+        <div class="crown-star">♥</div>
+        <div class="neon-title">幫我老婆決定下次畫乜好!</div>
+      </div>
 
-    <div class="canvas-wrapper">
-      <canvas id="wheelCanvas" width="440" height="440"></canvas>
+      <!-- 兩側復古彩燈 -->
+      <div class="side-bulbs left">
+        <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+      </div>
+      <div class="side-bulbs right">
+        <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+      </div>
+
+      <!-- 右側搖桿 -->
+      <div class="lever-container" id="lever" onclick="spinAll()">
+        <div class="lever-base"></div>
+        <div class="lever-rod">
+          <div class="lever-ball"></div>
+        </div>
+      </div>
+
+      <!-- 滾筒區域 -->
+      <div class="slot-frame">
+        <div>
+          <div class="reel-header">單位</div>
+          <div class="reel-column"><div class="reel-strip" id="strip-0"></div></div>
+        </div>
+
+        <div>
+          <div class="reel-header">類別</div>
+          <div class="reel-column"><div class="reel-strip" id="strip-1"></div></div>
+        </div>
+
+        <div>
+          <div class="reel-header">顏色</div>
+          <div class="reel-column"><div class="reel-strip" id="strip-2"></div></div>
+        </div>
+
+        <div>
+          <div class="reel-header">模式</div>
+          <div class="reel-column"><div class="reel-strip" id="strip-3"></div></div>
+        </div>
+
+        <div>
+          <div class="reel-header">細節</div>
+          <div class="reel-column"><div class="reel-strip" id="strip-4"></div></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="spinBtn" class="spin-btn" onclick="spinAll()">SPIN！</button>
+      </div>
+
+      <div class="result-box">
+        <div class="result-title">就決定係你啦!</div>
+        <div id="resultText" class="result-text">按下按鈕或拉動搖桿開始</div>
+      </div>
     </div>
+  </div>
 
-    <div>
-      <button id="spinBtn" class="btn" onclick="spinWheel()">開始旋轉</button>
-    </div>
+  <!-- 二階段彈窗（通用分類二階段） -->
+  <div id="animeModal" class="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle" style="color:#ffd700; font-size: 18px;">🎉 抽中指定類別！</h2>
+      <p id="modalSub" style="margin-top: 4px; font-size: 13px; color: #ccc;">二次抽選指定內容：</p>
+      
+      <div class="anime-reel-frame">
+        <div class="reel-strip" id="anime-strip"></div>
+      </div>
 
-    <div class="legend">
-      <div class="legend-item"><div class="legend-color" style="background:#ff9aa2;"></div> 外圈：類型</div>
-      <div class="legend-item"><div class="legend-color" style="background:#f6bd60;"></div> 中圈：顏色</div>
-      <div class="legend-item"><div class="legend-color" style="background:#84dcc6;"></div> 內圈：方式</div>
-    </div>
-
-    <div class="result-box">
-      <div class="result-title">最終決定</div>
-      <div id="resultText" class="result-text">點擊按鈕開啟今日選擇！</div>
+      <button id="modalCloseBtn" class="close-btn" style="display:none;" onclick="closeModal()">確認結果</button>
     </div>
   </div>
 
   <script>
-    const canvas = document.getElementById('wheelCanvas');
-    const ctx = canvas.getContext('2d');
-    const spinBtn = document.getElementById('spinBtn');
-    const resultText = document.getElementById('resultText');
-
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-
-    // 定義三層輪盤的資料與半徑
-    const layers = [
-      {
-        name: "外圈",
-        rInner: 140,
-        rOuter: 200,
-        items: ["One Piece", "Naruto", "Dan da dan", "bleach", "dragonball", "Slam Dunk"],
-        colors: ["#FF9AA2", "#FFB7B2", "#FFDAC1", "#E2F0CB", "#B5EAD7", "#C7CEEA"],
-        angle: 0,
-        speed: 0,
-        friction: 0.985
+    // 1. 資料庫定義
+    const data = {
+      unit: ["個體", "群體"],
+      category: ["動漫", "卡通", "動物", "生果"],
+      color: ["紅", "橙", "黃", "綠", "藍", "紫", "粉紅", "黑", "白", "灰"],
+      modeType: ["擬態化", "造型化", "無變化"],
+      modeDetails: {
+        "擬態化": ["人形化", "動物化", "花朵化", "妖怪化", "精靈化", "天使或惡魔化"],
+        "造型化": ["髮型化", "服裝化", "飾物化", "武器化"],
+        "無變化": ["無變化"]
       },
-      {
-        name: "中圈",
-        rInner: 80,
-        rOuter: 140,
-        items: ["red", "blue", "green", "pink", "white"],
-        colors: ["#F6BD60", "#F7ADE1", "#84DCC6", "#A5A58D", "#D8E2DC"],
-        angle: 0,
-        speed: 0,
-        friction: 0.982
-      },
-      {
-        name: "內圈",
-        rInner: 25,
-        rOuter: 80,
-        items: ["擬態化", "造型化", "無變化"],
-        colors: ["#E8AEB7", "#B8E0D2", "#D6E2E9"],
-        angle: 0,
-        speed: 0,
-        friction: 0.980
+      // 1-1. 動漫 IP
+      animeIPs: [
+        { name: "ONE PIECE", logo: "./anime logo/One-Piece-Logo.png" },
+        { name: "火影忍者", logo: "./anime logo/naruto.png" },
+        { name: "膽大黨", logo: "./anime logo/dandadan.png" },
+        { name: "BLEACH", logo: "./anime logo/bleach-.png" },
+        { name: "七龍珠", logo: "./anime logo/dragonball.png" },
+        { name: "灌籃高手", logo: "./anime logo/slamdunk.png" },
+        { name: "咒術迴戰", logo: "./anime logo/jujutsu-kaisen.png" },
+        { name: "鬼滅之刃", logo: "./anime logo/demon.png" },
+        { name: "HunterxHunter", logo: "./anime logo/Hunter-X-Hunter-.png" },
+        { name: "坂本日常", logo: "./anime logo/坂本日常.png" },
+        { name: "EVA", logo: "./anime logo/EVA.png" },
+        { name: "妖精的尾巴", logo: "./anime logo/妖精的尾巴.png" },
+        { name: "我的英雄學院", logo: "./anime logo/我的英雄學院.png" }
+      ],
+      // 1-2. 卡通 IP
+      cartoonIPs: [
+        { name: "POKEMON", logo: "./anime logo/pokemon.png" },
+        { name: "DISNEY", logo: "./anime logo/disney.png" },
+        { name: "PIXAR", logo: "./anime logo/Pixar-Logo.png" },
+        { name: "宮崎駿", logo: "./anime logo/宮崎駿.png" },
+        { name: "DreamWorks", logo: "./anime logo/DreamWorks.png" }
+      ],
+      // 1-3. 常見動物與 ICON
+      animalTypes: [
+        { name: "狗", icon: "🐶" },
+        { name: "貓", icon: "🐱" },
+        { name: "兔子", icon: "🐰" },
+        { name: "熊貓", icon: "🐼" },
+        { name: "獅子", icon: "🦁" },
+        { name: "企鵝", icon: "🐧" },
+        { name: "狐狸", icon: "🦊" },
+        { name: "水豚", icon: "🦫" }
+      ],
+      // 1-4. 常見生果與 ICON
+      fruitTypes: [
+        { name: "蘋果", icon: "🍎" },
+        { name: "香蕉", icon: "🍌" },
+        { name: "草莓", icon: "🍓" },
+        { name: "葡萄", icon: "🍇" },
+        { name: "西瓜", icon: "🍉" },
+        { name: "水蜜桃", icon: "🍑" },
+        { name: "檸檬", icon: "🍋" },
+        { name: "櫻桃", icon: "🍒" }
+      ]
+    };
+
+    const colorHex = {
+      "紅": "#ff4d4d", "橙": "#ffa64d", "黃": "#ffdb4d", "綠": "#66cc66",
+      "藍": "#4da6ff", "紫": "#b366ff", "粉紅": "#ff99dd", "黑": "#333333",
+      "白": "#e6e6e6", "灰": "#999999"
+    };
+
+    function buildStrip(items, isColor = false) {
+      let html = '';
+      for (let i = 0; i < 20; i++) {
+        items.forEach(item => {
+          if (isColor) {
+            const bg = colorHex[item];
+            const borderStyle = 'box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);';
+            html += `<div class="reel-item" style="background-color: ${bg}; ${borderStyle}" title="${item}"></div>`;
+          } else {
+            html += `<div class="reel-item">${item}</div>`;
+          }
+        });
       }
-    ];
+      return html;
+    }
 
+    // 初始化滾筒
+    document.getElementById('strip-0').innerHTML = buildStrip(data.unit);
+    document.getElementById('strip-1').innerHTML = buildStrip(data.category);
+    document.getElementById('strip-2').innerHTML = buildStrip(data.color, true);
+    document.getElementById('strip-3').innerHTML = buildStrip(data.modeType);
+    document.getElementById('strip-4').innerHTML = buildStrip(data.modeDetails["擬態化"]);
+
+    let currentResults = {};
     let isSpinning = false;
 
-    // 繪製輪盤主邏輯
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // 繪製每一層圓環
-      layers.forEach(layer => {
-        const sliceAngle = (Math.PI * 2) / layer.items.length;
-
-        layer.items.forEach((item, i) => {
-          const startAngle = layer.angle + i * sliceAngle;
-          const endAngle = startAngle + sliceAngle;
-
-          // 繪製扇形弧塊
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, layer.rOuter, startAngle, endAngle);
-          ctx.arc(centerX, centerY, layer.rInner, endAngle, startAngle, true);
-          ctx.closePath();
-
-          ctx.fillStyle = layer.colors[i % layer.colors.length];
-          ctx.fill();
-          ctx.lineWidth = 2;
-          ctx.strokeStyle = "#ffffff";
-          ctx.stroke();
-
-          // 繪製文字
-          ctx.save();
-          const midAngle = startAngle + sliceAngle / 2;
-          const textRadius = (layer.rInner + layer.rOuter) / 2;
-          
-          ctx.translate(
-            centerX + Math.cos(midAngle) * textRadius,
-            centerY + Math.sin(midAngle) * textRadius
-          );
-          ctx.rotate(midAngle + Math.PI / 2); // 調整文字角度為切線方向
-
-          ctx.fillStyle = "#333333";
-          ctx.font = "bold 12px sans-serif";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillText(item, 0, 0);
-          ctx.restore();
-        });
-      });
-
-      // 繪製中心小圓點
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, 20, 0, Math.PI * 2);
-      ctx.fillStyle = "#ffffff";
-      ctx.fill();
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = "#4a90e2";
-      ctx.stroke();
-
-      // 繪製頂部指針（指向 12 點鐘方向）
-      drawPointer();
-    }
-
-    // 繪製固定頂部指針
-    function drawPointer() {
-      const pointerLength = 20;
-      const topY = centerY - 200; // 外圈最邊緣頂端
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.moveTo(centerX - 12, topY - 10);
-      ctx.lineTo(centerX + 12, topY - 10);
-      ctx.lineTo(centerX, topY + pointerLength - 10);
-      ctx.closePath();
-
-      ctx.fillStyle = "#e74c3c";
-      ctx.fill();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = "#ffffff";
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    // 開始旋轉
-    function spinWheel() {
+    // 開始旋轉所有滾筒
+    function spinAll() {
       if (isSpinning) return;
-
       isSpinning = true;
-      spinBtn.disabled = true;
-      resultText.innerText = "選擇中...";
+      document.getElementById('spinBtn').disabled = true;
+      document.getElementById('resultText').innerText = "旋轉中...";
 
-      // 為每一層設定隨機初始速度與微幅不同的摩擦係數
-      layers.forEach(layer => {
-        layer.speed = Math.random() * 0.2 + 0.3; // 初始角速度
-        layer.friction = 0.98 + Math.random() * 0.008; // 隨機減速係數
-      });
+      // 播放拉桿下壓動畫
+      const lever = document.getElementById('lever');
+      lever.classList.add('pull');
+      setTimeout(() => lever.classList.remove('pull'), 400);
 
-      animate();
-    }
+      const resUnit = getRandomItem(data.unit);
+      const resCategory = getRandomItem(data.category);
+      const resColor = getRandomItem(data.color);
+      const resModeType = getRandomItem(data.modeType);
 
-    // 動畫循環
-    function animate() {
-      let stillMoving = false;
+      const detailOptions = data.modeDetails[resModeType];
+      document.getElementById('strip-4').innerHTML = buildStrip(detailOptions);
+      const resDetail = getRandomItem(detailOptions);
 
-      layers.forEach(layer => {
-        if (layer.speed > 0.0005) {
-          layer.angle += layer.speed;
-          layer.speed *= layer.friction;
-          stillMoving = true;
-        } else {
-          layer.speed = 0;
-        }
-      });
+      currentResults = {
+        unit: resUnit,
+        category: resCategory,
+        color: resColor,
+        modeType: resModeType,
+        detail: resDetail,
+        subCategory: null
+      };
 
-      draw();
+      animateReel('strip-0', data.unit, resUnit, 2400);
+      animateReel('strip-1', data.category, resCategory, 2700);
+      animateReel('strip-2', data.color, resColor, 3000);
+      animateReel('strip-3', data.modeType, resModeType, 3300);
+      
+      setTimeout(() => {
+        animateReel('strip-4', detailOptions, resDetail, 2700);
+      }, 800);
 
-      if (stillMoving) {
-        requestAnimationFrame(animate);
-      } else {
+      setTimeout(() => {
         isSpinning = false;
-        spinBtn.disabled = false;
-        calculateResult();
-      }
-    }
-
-    // 計算指針落在哪一個區域（12點鐘方向，角度為 -Math.PI / 2 或 1.5 * Math.PI）
-    function calculateResult() {
-      const pointerAngle = -Math.PI / 2;
-      const results = [];
-
-      layers.forEach(layer => {
-        const sliceAngle = (Math.PI * 2) / layer.items.length;
+        document.getElementById('spinBtn').disabled = false;
         
-        // 將指針角度轉換為相對於輪盤目前的旋轉角度
-        let relativeAngle = (pointerAngle - layer.angle) % (Math.PI * 2);
-        if (relativeAngle < 0) relativeAngle += Math.PI * 2;
-
-        const selectedIndex = Math.floor(relativeAngle / sliceAngle) % layer.items.length;
-        results.push(layer.items[selectedIndex]);
-      });
-
-      // 顯示結果組合
-      resultText.innerHTML = `${results[0]} <span style="color:#aaa;">➔</span> ${results[1]} <span style="color:#aaa;">➔</span> ${results[2]}`;
+        // 觸發二階段彈窗
+        triggerSecondaryModal(resCategory);
+      }, 3700);
     }
 
-    // 初始繪製
-    draw();
+    function getRandomItem(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function animateReel(stripId, itemsArray, targetItem, duration) {
+      const strip = document.getElementById(stripId);
+      const itemIndex = itemsArray.indexOf(targetItem);
+      const itemHeight = 40;
+      
+      // 重置位置與動畫
+      strip.style.transition = 'none';
+      strip.style.transform = 'translateY(0px)';
+      void strip.offsetHeight; // 強制重繪
+
+      const targetOffset = (itemsArray.length * 15 + itemIndex - 1) * itemHeight;
+
+      strip.style.transition = `transform ${duration}ms cubic-bezier(0.12, 0.8, 0.32, 1)`;
+      strip.style.transform = `translateY(-${targetOffset}px)`;
+    }
+
+    // 通用二階段彈窗 (動漫/卡通/動物/生果)
+    function triggerSecondaryModal(category) {
+      const modal = document.getElementById('animeModal');
+      const animeStrip = document.getElementById('anime-strip');
+      const closeBtn = document.getElementById('modalCloseBtn');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalSub = document.getElementById('modalSub');
+
+      modalTitle.innerText = `🎉 抽中「${category}」類別！`;
+      modalSub.innerText = (category === "動漫" || category === "卡通") ? "二次抽選指定作品：" : "二次抽選指定種類：";
+
+      closeBtn.style.display = "none";
+      modal.style.display = "flex";
+
+      animeStrip.style.transition = 'none';
+      animeStrip.style.transform = 'translateY(0px)';
+      void animeStrip.offsetHeight;
+
+      // 依據類別取得對應資料庫
+      let subList = [];
+      if (category === "動漫") subList = data.animeIPs;
+      else if (category === "卡通") subList = data.cartoonIPs;
+      else if (category === "動物") subList = data.animalTypes;
+      else if (category === "生果") subList = data.fruitTypes;
+
+      // 生成滾筒內容
+      let html = '';
+      for (let i = 0; i < 20; i++) {
+        subList.forEach(item => {
+          if (item.logo) {
+            // 圖片 LOGO (附文字備用)
+            const logoImg = `<img src="${item.logo}" alt="${item.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">`;
+            const fallbackText = `<span style="display:none; color:#222; font-weight:bold; font-size:18px;">${item.name}</span>`;
+            html += `<div class="anime-reel-item">${logoImg}${fallbackText}</div>`;
+          } else if (item.icon) {
+            // Emoji ICON + 名稱
+            html += `<div class="anime-reel-item"><span style="font-size:26px; margin-right:6px;">${item.icon}</span><span style="color:#222; font-weight:bold; font-size:18px;">${item.name}</span></div>`;
+          } else {
+            // 純文字
+            html += `<div class="anime-reel-item"><span style="color:#222; font-weight:bold; font-size:18px;">${item.name}</span></div>`;
+          }
+        });
+      }
+      animeStrip.innerHTML = html;
+
+      const chosenSub = getRandomItem(subList);
+      currentResults.subCategory = chosenSub;
+
+      const itemIndex = subList.indexOf(chosenSub);
+      const targetOffset = (subList.length * 15 + itemIndex) * 60; // 項目高度為 60px
+
+      setTimeout(() => {
+        animeStrip.style.transition = `transform 3000ms cubic-bezier(0.12, 0.8, 0.32, 1)`;
+        animeStrip.style.transform = `translateY(-${targetOffset}px)`;
+      }, 50);
+
+      setTimeout(() => {
+        closeBtn.style.display = "inline-block";
+      }, 3500);
+    }
+
+    function closeModal() {
+      document.getElementById('animeModal').style.display = "none";
+      showFinalResult();
+    }
+
+    function showFinalResult() {
+      const { unit, category, color, modeType, detail, subCategory } = currentResults;
+      
+      let categoryDisplay = category;
+      if (subCategory) {
+        if (subCategory.logo) {
+          const logoImg = subCategory.logo ? `<img src="${subCategory.logo}" alt="${subCategory.name}" class="result-logo-img" onerror="this.style.display='none'">` : '';
+          categoryDisplay = `${category} (${logoImg}${subCategory.name})`;
+        } else if (subCategory.icon) {
+          categoryDisplay = `${category} (${subCategory.icon} ${subCategory.name})`;
+        } else {
+          categoryDisplay = `${category} (${subCategory.name})`;
+        }
+      }
+
+      let resultHTML = "";
+
+      // 當抽中「動物」或「生果」時，跳過顏色顯示
+      if (category === "動物" || category === "生果") {
+        resultHTML = `${unit} <span style="color:#888;">➔</span> ${categoryDisplay} <span style="color:#888;">➔</span> ${modeType} (${detail})`;
+      } else {
+        const colorDisplay = `<span class="color-tag" style="background:${colorHex[color]}"></span>${color}色`;
+        resultHTML = `${unit} <span style="color:#888;">➔</span> ${categoryDisplay} <span style="color:#888;">➔</span> ${colorDisplay} <span style="color:#888;">➔</span> ${modeType} (${detail})`;
+      }
+      
+      document.getElementById('resultText').innerHTML = resultHTML;
+    }
   </script>
-<script> if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js') .then(() => console.log('PWA Service Worker 註冊成功！')) .catch((err) => console.log('Service Worker 註冊失敗：', err)); }); } </script>
+
+  <!-- Service Worker 註冊 -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(() => console.log('PWA Service Worker 註冊成功！'))
+          .catch((err) => console.log('Service Worker 註冊失敗：', err));
+      });
+    }
+  </script>
+
 </body>
 </html>
